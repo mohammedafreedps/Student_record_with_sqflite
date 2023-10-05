@@ -1,7 +1,7 @@
  import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:studentlist/Photo_DB_manage.dart';
+
 import 'package:studentlist/addpage.dart';
 import 'package:studentlist/editpage.dart';
 import 'db_Management.dart';
@@ -23,6 +23,10 @@ class _FrondPageState extends State<FrondPage> {
     _loadDataFromDatabase();
   }
 
+  refreshData(){
+    _loadDataFromDatabase();
+  }
+
   Future _loadDataFromDatabase() async {
     final data = await studentDatabase()
         .readDataFromDB(limit: dataLimit, offset: dataOffset);
@@ -35,17 +39,6 @@ class _FrondPageState extends State<FrondPage> {
       });
     }
 
-    // await ImageDatabase().deleteAllImageData();
-
-    if (mounted) {
-      final imageFile = await ImageDatabase().readImageData();
-      setState(() {
-        if (imageFile != null) {
-          WholeImageList = List.from(imageFile);
-
-        }
-      });
-    }
   }
 
   @override
@@ -66,8 +59,8 @@ class _FrondPageState extends State<FrondPage> {
           ? ListView.builder(
               itemCount: students.length,
               itemBuilder: (BuildContext context, int index) {
-                final String? profileImage = (index < WholeImageList.length)
-                    ? WholeImageList[index]['image']
+                final String? profileImage = (index < students.length)
+                    ? students[index]['image']
                     : null;
                 final String studetname = students[index]['name'];
                 return GestureDetector(
@@ -84,6 +77,7 @@ class _FrondPageState extends State<FrondPage> {
                                     await studentDatabase().DeletestudfromDB(
                                         id: students[index]['id']);
                                     await studentDatabase().readDataFromDB();
+                                    refreshData();
                                     Navigator.pop(context);
                                   },
                                   child: const Text("Delete")),
@@ -94,7 +88,7 @@ class _FrondPageState extends State<FrondPage> {
                                             builder: (BuildContext context) {
                                       return EditPage(
                                         id: students[index]['id'],
-                                        imgid: WholeImageList[index]['id'],
+                                        // imgid: WholeImageList[index]['id'],
                                       );
                                     }));
                                   },
@@ -119,7 +113,7 @@ class _FrondPageState extends State<FrondPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddPage()),
+            MaterialPageRoute(builder: (context) => AddPage(DataAdded: refreshData,)),
           );
         },
         child: const Icon(Icons.add),

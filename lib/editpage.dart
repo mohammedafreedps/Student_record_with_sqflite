@@ -1,20 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:studentlist/Photo_DB_manage.dart';
 import 'package:studentlist/db_Management.dart';
 
 class EditPage extends StatefulWidget {
   final id;
-  final imgid;
 
-  const EditPage({super.key, required this.id, this.imgid});
+  const EditPage({super.key, required this.id});
 
   @override
   State<EditPage> createState() => _EditPageState();
 }
 
-ImageDatabase imageDatabase = ImageDatabase();
 
 class _EditPageState extends State<EditPage> {
   TextEditingController name = TextEditingController();
@@ -121,10 +118,9 @@ class _EditPageState extends State<EditPage> {
                         onclass: onclassValue,
                         gender: genderValue,
                         id: widget.id,
+                        image: _picselectd
                       );
                       await studentDatabase().readDataFromDB();
-                      imageDatabase.updateImage(id: widget.imgid, name: _picselectd);
-                      await ImageDatabase().readImageData();
                       Navigator.pop(context);
                     } else {
                       showDialog(

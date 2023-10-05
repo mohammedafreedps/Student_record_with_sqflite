@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 
 Database? _database;
-Database? _picdatabase;
+// Database? _picdatabase;
 List WholeDataList = [];
 
 class studentDatabase {
@@ -41,6 +41,7 @@ image TEXT
       'age': age,
       'gender': gender,
       'onclass': onclass,
+      'image': image
     };
     await db.insert(
       "student",
@@ -55,7 +56,7 @@ image TEXT
     final db = await database;
     final data = await db.query(
       "student",
-      columns: ['id', 'name', 'age', 'gender', 'onclass'],
+      columns: ['id', 'name', 'age', 'gender', 'onclass','image'],
     );
     return data;
   }

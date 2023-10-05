@@ -1,15 +1,13 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:studentlist/Photo_DB_manage.dart';
 import 'package:studentlist/addpage.dart';
 import 'package:studentlist/db_Management.dart';
 import 'package:studentlist/editpage.dart';
+import 'dart:io';
 
 List<Map<String, dynamic>> WholeDataList = [];
-List<Map<String, dynamic>> WholeImageList = [];
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({Key? key}) : super(key: key);
+  const SearchPage({super.key});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -23,36 +21,20 @@ class _SearchPageState extends State<SearchPage> {
     final data = await studentDatabase().readDataFromDB();
     setState(() {
       WholeDataList = data;
-      // Ensure the filtered data is updated when fetching all data
-      _filterData(searchController.text);
+      filteredData = data;
     });
-  }
-
-  _loadImageFromDatabase() async {
-    if (mounted) {
-      dynamic imageFile = await ImageDatabase().readImageData();
-      setState(() {
-        if (imageFile != null) {
-          WholeImageList = List.from(imageFile);
-          WholeDataList.addAll(imageFile);
-        }
-      });
-    }
   }
 
   @override
   void initState() {
     _fetchData();
-    _loadImageFromDatabase();
     super.initState();
   }
 
   void _filterData(String query) {
     setState(() {
-      filteredData = WholeDataList
-          .where((data) =>
-              data['name'].toLowerCase().contains(query.toLowerCase()))
-          .toList();
+      filteredData = WholeDataList.where((data) =>
+          data['name'].toLowerCase().contains(query.toLowerCase())).toList();
     });
   }
 
@@ -69,7 +51,7 @@ class _SearchPageState extends State<SearchPage> {
             icon: const Icon(Icons.refresh),
           ),
           centerTitle: true,
-          title: const Text("All Detail"),
+          title: const Text("Search"),
         ),
         body: Column(
           children: [
@@ -93,23 +75,19 @@ class _SearchPageState extends State<SearchPage> {
               child: ListView.builder(
                 itemCount: filteredData.length,
                 itemBuilder: (BuildContext context, int index) {
-                  String? profileImage = (index < WholeDataList.length)
-                      ? WholeImageList[index]['image']
-                      : null;
                   return Container(
-                    color: Colors.black54,
+                    color: const Color.fromARGB(221, 223, 223, 223),
                     child: Row(
                       children: [
                         Container(
                           margin: const EdgeInsetsDirectional.symmetric(
                               vertical: 30),
-                          width: 220,
+                          width: 170,
                           height: 120,
-                          child: ClipOval(
-                            child: Image(
-                              image: FileImage(File(profileImage!)),
-                            ),
-                          ),
+                          child: ClipRRect(
+                              child: Image(
+                                  image: FileImage(
+                                      File(filteredData[index]['image']!)))),
                         ),
                         Column(
                           children: [
@@ -128,8 +106,7 @@ class _SearchPageState extends State<SearchPage> {
                             Row(
                               children: [
                                 const Text('Age:  '),
-                                Text(
-                                    filteredData[index]['age'].toString()),
+                                Text(filteredData[index]['age'].toString()),
                               ],
                             ),
                             const SizedBox(
@@ -147,8 +124,7 @@ class _SearchPageState extends State<SearchPage> {
                             Row(
                               children: [
                                 const Text('Class:  '),
-                                Text(
-                                    filteredData[index]['onclass'].toString()),
+                                Text(filteredData[index]['onclass'].toString()),
                               ],
                             ),
                           ],
@@ -170,11 +146,28 @@ class _SearchPageState extends State<SearchPage> {
                             ),
                             ElevatedButton(
                               onPressed: () {
-                                setState(() {
-                                  studentDatabase().DeletestudfromDB(
-                                      id: filteredData[index]['id']);
-                                  _fetchData();
-                                });
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Do you ?"),
+                                        content: const Text(
+                                            "DO you really want to delet"),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  studentDatabase()
+                                                      .DeletestudfromDB(
+                                                          id: filteredData[
+                                                              index]['id']);
+                                                  _fetchData();
+                                                });
+                                              },
+                                              child: const Text("Yes"))
+                                        ],
+                                      );
+                                    });
                               },
                               child: const Text("Delete"),
                             )
@@ -191,7 +184,9 @@ class _SearchPageState extends State<SearchPage> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return const AddPage();
+              return AddPage(
+                DataAdded: _fetchData,
+              );
             }));
           },
           child: const Icon(Icons.add),

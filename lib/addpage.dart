@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:studentlist/db_Management.dart';
 import 'dart:io';
-import 'Photo_DB_manage.dart';
 
 
 class AddPage extends StatefulWidget {
-  const AddPage({Key? key}) : super(key: key);
+ 
+  final Function()DataAdded;
+  AddPage({required this.DataAdded});
 
   @override
   _AddPageState createState() => _AddPageState();
@@ -37,6 +38,7 @@ class _AddPageState extends State<AddPage> {
       // Handle the case when no image is selected
       return;
     }
+    
 
     final studentDb = studentDatabase();
     await studentDb.addDatatoDB(
@@ -44,11 +46,10 @@ class _AddPageState extends State<AddPage> {
       age: int.tryParse(age.text) ?? 0,
       gender: gender.text,
       onclass: int.tryParse(onclass.text) ?? 0,
-    );
-    final Imagedatabase = ImageDatabase();
-    await Imagedatabase.addImageLocally(
       image: _imagePath
     );
+    widget.DataAdded();
+    
     Navigator.pop(context);
   }
 
@@ -117,6 +118,7 @@ class _AddPageState extends State<AddPage> {
                   ),
                   ElevatedButton(
                     onPressed: ()async{
+                      
                      _addDataToDatabase();
                     },
                     child: const Text("Save"),
@@ -141,6 +143,5 @@ class _AddPageState extends State<AddPage> {
   
   saveButtnfunction()async {
     _addDataToDatabase;
-      await ImageDatabase().addImageLocally(image: _imagePath);
   }
 }
